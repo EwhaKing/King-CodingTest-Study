@@ -12,6 +12,6 @@
 ## ✔스터디원
 - [김수민](https://github.com/S00MIN-KIM)
 - [김아연](https://github.com/yourzinc)
-- [박수아]
+- 박수아
 - [안민경](https://github.com/Kyoungminn)
 
