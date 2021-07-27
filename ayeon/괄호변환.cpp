@@ -1,5 +1,5 @@
 /* PROCEEDING */
-==============================================================
+
 #include <string>
 #include <vector>
 #include <stack>
