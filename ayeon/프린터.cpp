@@ -1,53 +1,42 @@
 /* PROCEEDING */
 
-#include <iostream>
 #include <string>
 #include <vector>
 #include <queue>
+
 using namespace std;
 
-struct paper{
-	int i, priority;
-    paper(int a,int b): i(a), priority(b) {}
-};
+typedef struct{
+	int x; //index
+	int y; //priority
+}q;
 
-struct compare{
-	bool operator()(paper p1, paper p2)
-	{
-		return p1.priority < p2.priority;
-	}
-};
 
 int solution(vector<int> priorities, int location) {
-    int answer=0;
-    priority_queue<paper, vector<paper>, compare> printer;
     
-    for(int i=0; i<priorities.size(); i++)
-        printer.push(paper(i,priorities[i]));
+    int count = 0;
+    queue<q> Q;
+    priority_queue<int, vector<int>> heap;
     
-    queue<int> queue;
-    
-    while (priorities[location] <= printer.top().priority)
-    {
-        if(priorities[location] == printer.top().priority)
-        printer.pop();
-        answer++;
-        queue.push(location);
-        
+    for(int i=0; i<priorities.size(); i++){
+        Q.push({i,priorities[i]});
+        heap.push(priorities[i]);
     }
-    return printer.top().i;
+    
+    while(!Q.empty())
+    {
+        if (Q.front().y < heap.top())
+        {
+            	Q.push(Q.front());
+	            Q.pop();
+        }
+        else
+        {
+            count++;
+            if (Q.front().x == location) return count;
+            Q.pop();
+            heap.pop();
+        }           
+    }
+    return count;
 }
-
-int main()
-{
-    int answer = 0;
-    priority_queue<paper, vector<paper>, compare> printer;
-    
-    vector<int> priorities = {2, 1, 3, 2};
-    
-
-    
-    cout << solution(priorities,1);
-    return 0;
-}
-
