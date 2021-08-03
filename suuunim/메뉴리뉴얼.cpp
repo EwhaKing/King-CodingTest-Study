@@ -1,86 +1,74 @@
 #include <string>
 #include <vector>
-#include <map>
 #include <algorithm>
-
 using namespace std;
 
-
-
-vector<string> solution(vector<string> orders, vector<int> course) {
-    vector<string> answer;
-    map<int, int> maxNum; // 메뉴 갯수, 최대값
-    map<int, vector<string>> result; // 메뉴 갯수, string들 
-
-    for(int i=0; i<orders.size(); i++){
-        // includes 사용을 위해 sort해두기
-        sort(orders[i].begin(), orders[i].end());
+//부분 집합 찾기
+void find_subset(int pos, string c, string course, vector<string>& courses) {
+    if (pos >= c.length()) {
+        if (course.length() >= 2) //최소 2가지 이상의 단품메뉴
+            courses.push_back(course);
+        return;
     }
-
-    for(int i=0; i<course.size(); i++){
-        maxNum[course[i]] = 1;
-        vector<string> tmp;
-        result[course[i]] = tmp;
-    }
-
-    while(orders.size()){ // orders 돌면서
-        string target = orders[0]; 
-        orders.erase(orders.begin());
-        int t_size = target.size();
-        vector<int> tmp(t_size, 0); // 조합을 만들기 위한 tmp vector
-
-        for(int i=0; i<course.size(); i++){
-            int size = course[i]; // 몇 개의 조합을 찾을 건지 결정
-            if(t_size<size) // 현재 order의 크기보다 필요로하는 조합 갯수가 더 크면 건너뛰기
-                continue;
-
-            // 뒤부터 size개만큼 1 채우기
-            // next_permutation 적용시 오름차순으로 구성되어있어야 함
-            for(int j=t_size-1; j>=t_size-size; j--){
-                tmp[j] = 1;
-            }
-
-            do{
-                string t_string = ""; // 포함되어있는지 검사할 string
-                for(int j=0; j<tmp.size(); j++){
-                    if(tmp[j]==1)
-                        t_string += target[j];
-                }
-
-                int num = 1; // 겹치는 횟수 측정
-                for(int j=0; j<orders.size(); j++){ // 해당 target string을 포함하고 있는 문자열이 orders에 있는지 확인
-                    if(includes(orders[j].begin(), orders[j].end(), t_string.begin(), t_string.end())){
-                        // 포함하고 있으면 num 증가
-                        num += 1;
-                    }
-                }
-
-                if(num == 1) // 겹치는게 없으면 그냥 넘어가기
-                    continue;
-
-                if(maxNum[size]<num){
-                    // max보다 크면 vector 초기화 및 추가
-                    result[size].clear();
-                    maxNum[size] = num;
-                    result[size].push_back(t_string);
-                }else if(maxNum[size]==num){
-                    // max와 같으면 string 추가
-                    result[size].push_back(t_string);
-                }
-            }while(next_permutation(tmp.begin(), tmp.end())); // 조합 사용
-        }
-    }
-
-    // answer 추출
-    for(int i=0; i<result.size(); i++){
-        for(int j=0; j<result[i].size(); j++){
-            answer.push_back(result[i][j]);
-        }
-    }
-
-    // 정렬
-    sort(answer.begin(), answer.end());
-
-    return answer;
+    find_subset(pos + 1, c, course, courses);
+    find_subset(pos + 1, c, course + c[pos], courses);
 }
 
+vector<string> solution(vector<string> orders, vector<int> course) {
+    vector<string> courses;
+
+    //각 손님마다 일대일로 공통 메뉴들을 찾음
+    for (int i = 0; i < orders.size() - 1; i++) {
+
+        //손님이 시킨 메뉴를 알파벳순으로 정렬
+        sort(orders[i].begin(), orders[i].end());
+
+        for (int j = i + 1; j < orders.size(); j++) {
+            string c = "";
+            for (int k = 0; k < orders[i].length(); k++) {
+                if (orders[j].find(orders[i][k]) <= orders[j].length())
+                    c += orders[i][k];
+            }
+            if (c.length() > 1) { //두 손님의 공통 메뉴들로부터 부분집합을 만듦
+                find_subset(0, c, "", courses);
+            }
+        }
+    }
+    sort(courses.begin(), courses.end());
+    courses.erase(unique(courses.begin(), courses.end()), courses.end()); //중복 제거
+
+    vector <pair <string, int>> course_count;
+
+    //각 코스 별로 몇 명의 손님이 주문했는지 확인
+    for (int i = 0; i < courses.size(); i++) {
+        int c_count = 0;
+        for (int j = 0; j < orders.size(); j++) {
+            int check = 0;
+            for (int k = 0; k < courses[i].length(); k++) {
+                if (orders[j].find(courses[i][k]) <= orders[j].length())
+                    check++;
+            }
+            if (check == courses[i].length())
+                c_count++;
+        }
+        course_count.push_back(make_pair(courses[i], c_count));
+    }
+    vector<string> answer;
+
+    //코스요리 구성 메뉴 개수 별로 가장 많이 주문한 코스를 찾음
+    for (int i = 0; i < course.size(); i++) {
+        int max_count = 0;
+        for (int j = 0; j < course_count.size(); j++) {
+            if (course_count[j].first.length() == course[i])
+                if (course_count[j].second > max_count)
+                    max_count = course_count[j].second;
+        }
+        for (int j = 0; j < course_count.size(); j++) {
+            if (course_count[j].first.length() == course[i])
+                if (course_count[j].second == max_count)
+                    answer.push_back(course_count[j].first);
+        }
+    }
+    sort(answer.begin(), answer.end());
+    return answer;
+}
