@@ -1,4 +1,4 @@
-
+// NP
 /*
 #include <string>
 #include <vector>
