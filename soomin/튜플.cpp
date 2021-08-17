@@ -14,7 +14,6 @@ vector<int> solution(string s) {
     for (int i = 1; i < s.size() - 1; i++) {
         if (s[i] == '}') {
             num += stoi(s.substr(start, length));
-            printf("%d %d\n", position, num);
             tmp.push_back(make_pair(position, num));
             position = 0;
             length = 0;
