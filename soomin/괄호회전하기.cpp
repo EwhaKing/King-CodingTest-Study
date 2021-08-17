@@ -34,5 +34,6 @@ int solution(string s) {
         string ns = s.substr(i, s.size() - i) + s.substr(0, i);
         answer += check(ns);
     }
+    
     return answer;
 }
